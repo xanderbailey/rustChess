@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-mod pieces;
 
 const ROWS: i32 = 10;
 const FILES: i32 = 10;
@@ -16,7 +15,7 @@ impl HasLocation for Queen {
 }
 
 impl HasMovement for Queen {
-    pub fn possible_moves(&self) -> HashSet<Location> {
+    fn possible_moves(&self) -> HashSet<Location> {
         let mut set = HashSet::new();
         let first: HashSet<Location> = (0..FILES)
             .map(|i| Location {
@@ -61,8 +60,20 @@ struct Location {
     file: i32,
 }
 
+impl Location {
+    fn new(row: i32, file: i32) -> Location {
+        Location {row: row, file: file}
+    }
+}
+
 trait HasMovement {
-    pub fn possible_moves(&self) -> HashSet<Location>;
+    fn possible_moves(&self) -> HashSet<Location>;
+}
+
+#[test]
+fn test_queen_movement(){
+    let queen = Queen {location: Location { row: 0, file: 0 }};
+    assert!(queen.possible_moves().contains(Location::new(10, 10)))
 }
 
 trait HasLocation {

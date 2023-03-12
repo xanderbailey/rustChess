@@ -1,1 +1,2 @@
-mod pieces_test;
+mod chess;
+mod pieces;
