@@ -1,14 +1,11 @@
 use std::collections::HashSet;
-
-fn main() {
-    println!("Hello, world!");
-}
+mod pieces;
 
 const ROWS: i32 = 10;
 const FILES: i32 = 10;
 
 #[derive(Copy, Clone)]
-struct Queen {
+pub struct Queen {
     location: Location,
 }
 
@@ -19,7 +16,7 @@ impl HasLocation for Queen {
 }
 
 impl HasMovement for Queen {
-    fn possible_moves(&self) -> HashSet<Location> {
+    pub fn possible_moves(&self) -> HashSet<Location> {
         let mut set = HashSet::new();
         let first: HashSet<Location> = (0..FILES)
             .map(|i| Location {
@@ -57,6 +54,7 @@ fn diagonal_positions(start: Location) -> HashSet<Location> {
         .collect()
 }
 
+
 #[derive(Copy, Clone, Hash, Eq, PartialEq)]
 struct Location {
     row: i32,
@@ -64,7 +62,7 @@ struct Location {
 }
 
 trait HasMovement {
-    fn possible_moves(&self) -> HashSet<Location>;
+    pub fn possible_moves(&self) -> HashSet<Location>;
 }
 
 trait HasLocation {
