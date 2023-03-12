@@ -8,6 +8,49 @@ pub struct Queen {
     location: Location,
 }
 
+pub struct Pawn {
+    location: Location,
+    colour: Colour,
+}
+
+impl HasLocation for Pawn {
+    fn location(&self) -> Location {
+        self.location
+    }
+}
+
+impl HasMovement for Pawn {
+    fn possible_moves(&self) -> HashSet<Location> {
+        match self.colour {
+            Colour::Black => black_pawn_moves(self.location),
+            Colour::White => white_pawn_moves(self.location),
+        }
+    }
+}
+
+fn black_pawn_moves(location: Location) -> HashSet<Location> {
+    let mut locations: HashSet<Location> = HashSet::new();
+    locations.insert(Location::new(location.row - 1, location.file));
+    if location.row == ROWS {
+        locations.insert(Location::new(location.row - 2, location.file));
+    }
+    locations
+}
+
+fn white_pawn_moves(location: Location) -> HashSet<Location> {
+    let mut locations: HashSet<Location> = HashSet::new();
+    locations.insert(Location::new(location.row + 1, location.file));
+    if (location.row == ROWS) {
+        locations.insert(Location::new(location.row + 2, location.file));
+    }
+    locations
+}
+
+enum Colour {
+    White,
+    Black,
+}
+
 impl HasLocation for Queen {
     fn location(&self) -> Location {
         self.location
@@ -38,21 +81,24 @@ impl HasMovement for Queen {
 }
 
 fn diagonal_positions(start: Location) -> HashSet<Location> {
-    let first = (-FILES..FILES).zip(-ROWS..ROWS).map(|(x, y)| Location {
-        row: start.row + x,
-        file: start.file + y,
-    });
-    let second = (-FILES..FILES).zip(ROWS..-ROWS).map(|(x, y)| Location {
-        row: start.row + x,
-        file: start.file + y,
-    });
+    let first = (-FILES..FILES + 1)
+        .zip(-ROWS..ROWS + 1)
+        .map(|(x, y)| Location {
+            row: start.row + x,
+            file: start.file + y,
+        });
+    let second = (-FILES..FILES + 1)
+        .zip(ROWS..-ROWS - 1)
+        .map(|(x, y)| Location {
+            row: start.row + x,
+            file: start.file + y,
+        });
     first
         .chain(second)
         .into_iter()
-        .filter(|loc| loc.row >= 0 && loc.row < ROWS && loc.file >= 0 && loc.file <= FILES)
+        .filter(|loc| loc.row >= 0 && loc.row <= ROWS && loc.file >= 0 && loc.file <= FILES)
         .collect()
 }
-
 
 #[derive(Copy, Clone, Hash, Eq, PartialEq)]
 struct Location {
@@ -62,20 +108,28 @@ struct Location {
 
 impl Location {
     fn new(row: i32, file: i32) -> Location {
-        Location {row: row, file: file}
+        Location {
+            row: row,
+            file: file,
+        }
     }
 }
 
 trait HasMovement {
-    fn possible_moves(&self) -> HashSet<Location>;
-}
-
-#[test]
-fn test_queen_movement(){
-    let queen = Queen {location: Location { row: 0, file: 0 }};
-    assert!(queen.possible_moves().contains(Location::new(10, 10)))
+    fn possible_moves(&self, allPieces: dyn HashSet<HasLocation>) -> HashSet<Location>;
 }
 
 trait HasLocation {
     fn location(&self) -> Location;
+}
+
+#[test]
+fn test_queen_movement() {
+    let queen = Queen {
+        location: Location { row: 0, file: 0 },
+    };
+    assert!(queen.possible_moves().contains(&Location::new(0, 0)));
+    assert!(queen.possible_moves().contains(&Location::new(ROWS, 0)));
+    assert!(queen.possible_moves().contains(&Location::new(ROWS, FILES)));
+    assert!(queen.possible_moves().contains(&Location::new(0, FILES)));
 }
